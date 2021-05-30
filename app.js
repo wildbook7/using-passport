@@ -10,26 +10,22 @@ app.set("view engine", "ejs");
 app.use(session({secret: "好きな文字列"}));
 app.use(passport.initialize()); // Expressを使用している場合はInitializeが必要
 app.use(passport.session());
+app.use(express.urlencoded({ extended: false }));
 
-passport.use(new LocalStrategy({
-    userNameField:'username',
-    passwordField:'password',
-    passReqToCallback: true
-},function(req, username, password, done){
-    process.nextTick(function(){
-    //処理書く
-      　//ユーザ名、パスワード不正時の処理を記述する
-        if(!username){
-            return done(null, false, { message: 'Username is incorrect' })
-        //↓にはPasswordチェック処理を実装してください。
-        } else if(password !== "password123"){
-            return done(null, false, { message: 'Username is incorrect' })
-        } else{
-            console.log("username"+username)
-            return done(null, username);
-        }
-    })
+passport.use(new LocalStrategy((username, password, done) => {
+  if (username !== "test" || password !== "password123"){
+      return done(null, false);
+  } else{
+      return done(null, username);
+  }
 }));
+passport.serializeUser(function(user, done) {
+  done(null, user);
+});
+
+passport.deserializeUser(function(user, done) {
+  done(null, user);
+});
 
 app.get("/login", usersController.login);
 let isLogined = function(req, res, next){
